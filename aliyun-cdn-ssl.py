@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from aliyunsdkcore import client
 from aliyunsdkcdn.request.v20180510 import SetDomainServerCertificateRequest
 from aliyunsdkcdn.request.v20180510 import DescribeDomainCertificateInfoRequest
