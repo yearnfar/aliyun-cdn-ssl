@@ -1,3 +1,10 @@
-aliyun-python-sdk-cdn==3.6.9
+aliyun-python-sdk-cdn==3.8.8
 aliyun-python-sdk-cloudapi==4.9.2
-aliyun-python-sdk-core==2.13.35
+aliyun-python-sdk-core==2.15.1
+cffi==1.16.0
+cryptography==43.0.0
+jmespath==0.10.0
+pycparser==2.22
+PyYAML==6.0.1
+setuptools==72.1.0
+wheel==0.43.0

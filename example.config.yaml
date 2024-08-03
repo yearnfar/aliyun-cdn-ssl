@@ -1,0 +1,9 @@
+- 
+  reset_days : 10
+  access_key_id: ''
+  access_key_secret : ''
+  region : ''
+  cert_path : ''
+  cert_key_path : ''
+  domains : 
+    - 'test.example.com'

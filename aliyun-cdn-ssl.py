@@ -8,9 +8,11 @@ from aliyunsdkcore.acs_exception.exceptions import ServerException
 from datetime import datetime
 import json
 import argparse
+import os
+import yaml
 
 
-def auto_ssl(access_key_id='', access_key_secret='', region='cn-hangzhou', domain='', cert_path='', cert_key_path='',  reset_days=10):
+def auto_ssl(access_key_id, access_key_secret, region, domain, cert_path, cert_key_path,  reset_days=10):
     acs_client = client.AcsClient(access_key_id, access_key_secret, region)
     try:
         req = DescribeDomainCertificateInfoRequest.DescribeDomainCertificateInfoRequest()
@@ -54,26 +56,18 @@ def auto_ssl(access_key_id='', access_key_secret='', region='cn-hangzhou', domai
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Auto Aliyun CDN SSL', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-access_key_id", "--access_key_id",
-                        help="阿里云access_key_id", required=True)
-    parser.add_argument("-access_key_secret",
-                        "--access_key_secret", help="阿里云access_key_secret", required=True)
-    parser.add_argument("-region", "--region", help="地区", default='cn-hangzhou')
-    parser.add_argument("-domain", "--domain", help="域名", required=True)
-    parser.add_argument("-cert_path", "--cert_path",
-                        required=True, help="cert证书路径")
-    parser.add_argument("-cert_key_path", "--cert_key_path",
-                        required=True, help="cert key路径")
-    parser.add_argument("-reset_days", "--reset_days",
-                        default=10, help="证书更新周期")
+    parser = argparse.ArgumentParser(description='Auto Aliyun CDN SSL', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("-config", "--config", help="配置文件", default='/app/config.yaml')
 
     args = parser.parse_args()
-    auto_ssl(access_key_id=args.access_key_id,
-             access_key_secret=args.access_key_secret,
-             region=args.region,
-             domain=args.domain,
-             cert_path=args.cert_path,
-             cert_key_path=args.cert_key_path,
-             reset_days=args.reset_days)
+    cfg_file = args.config
+    cfg_path = os.path.dirname(cfg_file)
+
+    with open(cfg_file, 'r', encoding='utf-8') as f:
+        cdn_cfg = yaml.load(f, Loader=yaml.FullLoader)
+        for cfg in cdn_cfg:
+            for domain in cfg['domains']:
+                cert_path= os.path.join(cfg_path, cfg['cert_path'])
+                cert_key_path = os.path.join(cfg_path, cfg['cert_key_path'])
+                auto_ssl(cfg['access_key_id'], cfg['access_key_secret'], cfg['region'], domain, cert_path, cert_key_path, cfg['reset_days'])      
+
