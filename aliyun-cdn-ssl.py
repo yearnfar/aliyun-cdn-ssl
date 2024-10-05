@@ -15,14 +15,13 @@ import yaml
 def auto_ssl(access_key_id, access_key_secret, region, domain, cert_path, cert_key_path):
     acs_client = client.AcsClient(access_key_id, access_key_secret, region)
     try:
+        print('域名: %s' % domain)
         req = DescribeDomainCertificateInfoRequest.DescribeDomainCertificateInfoRequest()
         req.set_DomainName(domain)
         result = acs_client.do_action_with_exception(req)
         json_res = json.loads(result)
         # print(jsonRes)
-        info = json_res['CertInfos']['CertInfo'][0] if len(
-            json_res['CertInfos']['CertInfo']) > 0 else {}
-        print(info['CertExpireTime'])
+        info = json_res['CertInfos']['CertInfo'][0] if len(json_res['CertInfos']['CertInfo']) > 0 else {}
 
         is_ok = False    
         if 'CertExpireTime' in info: 
