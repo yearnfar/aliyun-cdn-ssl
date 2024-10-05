@@ -6,7 +6,6 @@ from aliyunsdkcdn.request.v20180510 import SetDomainServerCertificateRequest
 from aliyunsdkcdn.request.v20180510 import DescribeDomainCertificateInfoRequest
 from aliyunsdkcore.acs_exception.exceptions import ServerException
 from datetime import datetime
-from datetime import timezone
 import json
 import argparse
 import os
@@ -28,7 +27,7 @@ def auto_ssl(access_key_id, access_key_secret, region, domain, cert_path, cert_k
 
         is_ok = False    
         if 'CertExpireTime' in info: 
-            current_time = datetime.now(timezone.utc)
+            current_time = datetime.now()
             expired_time = datetime.strptime(info['CertExpireTime'], "%Y-%m-%dT%H:%M:%SZ")
 
             left_days = (expired_time - current_time).days
