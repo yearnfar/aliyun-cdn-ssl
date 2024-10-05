@@ -6,13 +6,15 @@ from aliyunsdkcdn.request.v20180510 import SetDomainServerCertificateRequest
 from aliyunsdkcdn.request.v20180510 import DescribeDomainCertificateInfoRequest
 from aliyunsdkcore.acs_exception.exceptions import ServerException
 from datetime import datetime
+from datetime import timezone
 import json
 import argparse
 import os
 import yaml
+import time
 
 
-def auto_ssl(access_key_id, access_key_secret, region, domain, cert_path, cert_key_path,  reset_days=10):
+def auto_ssl(access_key_id, access_key_secret, region, domain, cert_path, cert_key_path):
     acs_client = client.AcsClient(access_key_id, access_key_secret, region)
     try:
         req = DescribeDomainCertificateInfoRequest.DescribeDomainCertificateInfoRequest()
@@ -24,18 +26,28 @@ def auto_ssl(access_key_id, access_key_secret, region, domain, cert_path, cert_k
             json_res['CertInfos']['CertInfo']) > 0 else {}
         print(info['CertExpireTime'])
 
-        current_time = datetime.now()
-        if info['CertExpireTime'] != '':
-            expired_time = datetime.strptime(
-                info['CertExpireTime'], "%Y-%m-%dT%H:%M:%SZ")
+        is_ok = False    
+        if 'CertExpireTime' in info: 
+            current_time = datetime.now(timezone.utc)
+            expired_time = datetime.strptime(info['CertExpireTime'], "%Y-%m-%dT%H:%M:%SZ")
 
             left_days = (expired_time - current_time).days
-            if left_days > reset_days:
+            if left_days < 10:
+               is_ok=True 
+               print("证书剩余%d天，更新证书..." % left_days)
+            elif left_days < 60:
+                cert_time=time.localtime(os.path.getmtime(cert_path))
+                if (current_time-cert_time).days <= 30:
+                    is_ok=True
+                    print("本地证书文件有变动，开始更新证书...")
+            else:
                 print("证书剩余%d天，剩余时间充足，不更新证书" % left_days)
-                return
-            print("证书剩余%d天，开始更新证书..." % left_days)
         else:
+            is_ok=True
             print("无法获取证书信息，开始更新证书...")
+
+        if is_ok==False:
+            return
 
         req = SetDomainServerCertificateRequest.SetDomainServerCertificateRequest()
         req.set_accept_format('json')
@@ -69,5 +81,5 @@ if __name__ == '__main__':
             for domain in cfg['domains']:
                 cert_path= os.path.join(cfg_path, cfg['cert_path'])
                 cert_key_path = os.path.join(cfg_path, cfg['cert_key_path'])
-                auto_ssl(cfg['access_key_id'], cfg['access_key_secret'], cfg['region'], domain, cert_path, cert_key_path, cfg['reset_days'])      
+                auto_ssl(cfg['access_key_id'], cfg['access_key_secret'], cfg['region'], domain, cert_path, cert_key_path)      
 
