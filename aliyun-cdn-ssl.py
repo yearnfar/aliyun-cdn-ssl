@@ -10,7 +10,6 @@ import json
 import argparse
 import os
 import yaml
-import time
 
 
 def auto_ssl(access_key_id, access_key_secret, region, domain, cert_path, cert_key_path):
@@ -35,7 +34,7 @@ def auto_ssl(access_key_id, access_key_secret, region, domain, cert_path, cert_k
                is_ok=True 
                print("证书剩余%d天，更新证书..." % left_days)
             elif left_days < 60:
-                cert_time=time.localtime(os.path.getmtime(cert_path))
+                cert_time=datetime.fromtimestamp(os.path.getmtime(cert_path))
                 if (current_time-cert_time).days <= 30:
                     is_ok=True
                     print("本地证书文件有变动，开始更新证书...")
